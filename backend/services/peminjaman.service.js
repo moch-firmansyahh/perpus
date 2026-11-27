@@ -102,9 +102,14 @@ export const createPeminjamanManual = (payload) => {
   }
 
   const now = new Date();
-  const batasKembali = payload.batasKembali
-    ? new Date(payload.batasKembali).toISOString()
-    : addDaysISO(now, durasiHari);
+  let batasKembali = addDaysISO(now, durasiHari);
+  if (payload.batasKembali !== undefined && payload.batasKembali !== '') {
+    const parsed = new Date(payload.batasKembali);
+    if (Number.isNaN(parsed.getTime())) {
+      throw new AppError(422, 'Format batasKembali tidak valid');
+    }
+    batasKembali = parsed.toISOString();
+  }
 
   const allowedStatus = ['DIPINJAM', 'DIKEMBALIKAN', 'TERLAMBAT'];
   const status = payload.status && allowedStatus.includes(payload.status) ? payload.status : 'DIPINJAM';

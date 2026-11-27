@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BookPlus, Pencil, RefreshCw, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DataTable } from '@/components/DataTable';
@@ -27,6 +27,7 @@ export default function BukuPage() {
   const { showToast } = useToast();
   const [user, setUser] = useState(null);
   const [books, setBooks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [kategori, setKategori] = useState('');
@@ -54,7 +55,15 @@ export default function BukuPage() {
     setLoading(true);
     try {
       const res = await api.listBuku({ search, kategori }, getToken());
-      setBooks(res.data || []);
+      const list = res.data || [];
+      setBooks(list);
+      setAllCategories((prev) => {
+        const merged = new Set(prev);
+        list.forEach((b) => {
+          if (b.kategori) merged.add(b.kategori);
+        });
+        return Array.from(merged).sort();
+      });
     } catch (err) {
       showToast({
         type: 'error',
@@ -70,10 +79,7 @@ export default function BukuPage() {
     loadBooks();
   }, [loadBooks]);
 
-  const categories = useMemo(() => {
-    const set = new Set(books.map((b) => b.kategori).filter(Boolean));
-    return Array.from(set).sort();
-  }, [books]);
+  const categories = allCategories;
 
   const openCreateModal = () => {
     setEditingBook(null);

@@ -1,3 +1,5 @@
+import { clearSession } from '@/lib/auth';
+
 const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function request(path, { method = 'GET', body, token } = {}) {
@@ -13,6 +15,10 @@ async function request(path, { method = 'GET', body, token } = {}) {
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401 && token && typeof window !== 'undefined') {
+      clearSession();
+      window.location.replace('/login');
+    }
     throw Object.assign(new Error(json.message || 'Permintaan gagal'), {
       status: res.status,
       errors: json.errors,

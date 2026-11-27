@@ -71,13 +71,23 @@ export default function SirkulasiPage() {
       return;
     }
 
+    const parsedDurasi = durasiHari === '' ? 7 : Number(durasiHari);
+    if (!Number.isInteger(parsedDurasi) || parsedDurasi < 1 || parsedDurasi > 30) {
+      showToast({
+        type: 'error',
+        title: 'Durasi tidak valid',
+        message: 'Durasi peminjaman harus bilangan bulat 1–30 hari.',
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await api.pinjam(
         {
           anggotaId,
           bukuId,
-          durasiHari: Number(durasiHari) || 7,
+          durasiHari: parsedDurasi,
         },
         getToken()
       );

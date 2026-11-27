@@ -15,7 +15,13 @@ export function ToastProvider({ children }) {
   const showToast = useCallback(
     ({ type = 'info', title, message }) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      setToasts((prev) => [...prev, { id, type, title, message }]);
+      setToasts((prev) => {
+        const isDuplicate = prev.some(
+          (t) => t.type === type && t.title === title && t.message === message
+        );
+        if (isDuplicate) return prev;
+        return [...prev, { id, type, title, message }];
+      });
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
       }, 4200);
